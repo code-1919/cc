@@ -1,0 +1,118 @@
+practical 6
+
+// web client (FileService)
+package server;
+
+import javax.jws.WebService;
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.xml.ws.soap.MTOM;
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import java.io.*;
+
+@WebService(serviceName = "FileService")
+@MTOM
+public class FileService {
+
+private static final String UPLOAD_PATH =
+"C:\\Users\\niles\\Downloads\\upload\\"; // path of file
+
+// Upload File
+@WebMethod(operationName = "uploadFile")
+public String uploadFile(
+@WebParam(name = "file") DataHandler file,
+@WebParam(name = "fileName") String fileName) {
+
+try {
+
+File folder = new File(UPLOAD_PATH);
+
+if (!folder.exists()) {
+folder.mkdirs();
+}
+
+InputStream input = file.getInputStream();
+File outputFile = new File(UPLOAD_PATH + fileName);
+FileOutputStream output = new FileOutputStream(outputFile);
+
+byte[] buffer = new byte[4096];
+int bytesRead;
+
+while ((bytesRead = input.read(buffer)) != -1) {
+output.write(buffer, 0, bytesRead);
+}
+
+output.close();
+input.close();
+
+return "File Uploaded Successfully";
+
+} catch (Exception e) {
+return "Error: " + e.getMessage();
+}
+}
+
+// Download File
+
+@WebMethod(operationName = "downloadFile")
+public DataHandler downloadFile(
+@WebParam(name = "fileName") String fileName) {
+
+try {
+
+File file = new File(UPLOAD_PATH + fileName);
+
+if (!file.exists()) {
+return null;
+}
+
+return new DataHandler(new FileDataSource(file));
+
+} catch (Exception e) {
+return null;
+}
+}
+}
+
+
+//javs class(TestClient)
+
+package client; 
+ 
+import java.io.FileOutputStream; 
+ 
+public class TestClient { 
+ 
+    public static void main(String[] args) { 
+ 
+        try { 
+ 
+            FileService_Service service = 
+                    new FileService_Service(); 
+            FileService port = 
+                    service.getFileServicePort(); 
+ 
+            // Download file from server 
+            byte[] data = port.downloadFile("test.jpg"); 
+ 
+            if (data == null) { 
+                System.out.println("File not found on server"); 
+                return; 
+            } 
+ 
+            // Save locally 
+            FileOutputStream fos = 
+        new FileOutputStream( 
+        "C:\\Users\\niles\\Downloads\\download\\downloaded_test.jpeg"); 
+ 
+            fos.write(data); 
+            fos.close(); 
+ 
+            System.out.println("File downloaded successfully!"); 
+ 
+        } catch (Exception e) { 
+            System.out.println("Error: " + e.getMessage()); 
+        } 
+    } 
+}
