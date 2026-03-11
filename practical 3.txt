@@ -1,0 +1,127 @@
+practical 3 :
+Write CRUD Code  :
+ 
+CREATE (Insert new player) 
+In CreatePlayerJerseyClient.java add: 
+package playerClient; 
+ 
+import playerentities.Player; 
+import playerentities.Team; 
+ 
+public class CreatePlayerMain { 
+ 
+    public static void main(String[] args) { 
+        CreateClient client = new CreateClient(); 
+        try { 
+            Player p = new Player(); 
+            p.setId(30); 
+            p.setFirstname("Harry"); 
+            p.setLastname("Potter"); 
+            p.setJerseynumber(60); 
+            p.setLastspokenwords("Thanks to my fans"); 
+ 
+            // 🔹 Set the team relation 
+            Team t = new Team(); 
+            t.setTeamid(1);      // TEAMID that already exists in TEAM table 
+            p.setTeamid(t);      // attach team object to player 
+ 
+            // send to REST service 
+            client.create_XML(p);   // or create_JSON(p); 
+            System.out.println("Player created successfully!"); 
+        } finally { 
+            client.close(); 
+        } 
+    } 
+} 
+ 
+ 
+  
+  
+READ 
+package playerClient; 
+ 
+import playerentities.Player; 
+ 
+public class ReadPlayersMain { 
+    public static void main(String[] args) { 
+        CreateClient client = new CreateClient(); 
+        try { 
+            // findAll_XML returns list; we map it to an array 
+            Player[] players = client.findAll_XML(Player[].class); 
+ 
+            System.out.println("Retrieving and displaying player details:"); 
+            if (players != null) { 
+                for (Player p : players) { 
+                    System.out.println("Id: " + p.getId()); 
+                    System.out.println("First Name: " + p.getFirstname()); 
+                    System.out.println("Last Name: " + p.getLastname()); 
+                    System.out.println("Jersey No: " + p.getJerseynumber()); 
+                    System.out.println("Last Spoken Words: " + p.getLastspokenwords()); 
+                    System.out.println("Team Id: " + p.getTeamid()); 
+                    System.out.println("---------------------------"); 
+                } 
+            } else { 
+                System.out.println("No players found."); 
+            } 
+        } finally { 
+            client.close(); 
+        } 
+    } 
+} 
+ 
+DELETE 
+package playerClient; 
+ 
+public class DeletePlayerMain { 
+    public static void main(String[] args) { 
+        CreateClient client = new CreateClient(); 
+        String id = "30";   // player id to delete 
+ 
+        try { 
+            client.remove(id); 
+            System.out.println("Player with id " + id + " deleted successfully!"); 
+        } finally { 
+            client.close(); 
+        } 
+    } 
+} 
+ 
+ 
+  
+UPDATE 
+package playerClient; 
+ 
+import playerentities.Player; 
+ 
+public class UpdatePlayerMain { 
+    public static void main(String[] args) { 
+        CreateClient client = new CreateClient(); 
+        String id = "30";   // player id you want to update 
+ 
+        try { 
+            // 1. Get existing player 
+            Player p = client.find_XML(Player.class, id); 
+ 
+            if (p == null) { 
+                System.out.println("Player with id " + id + " not found."); 
+                return; 
+            } 
+ 
+            System.out.println("Before update:"); 
+            System.out.println("First Name: " + p.getFirstname()); 
+            System.out.println("Jersey No: " + p.getJerseynumber()); 
+            System.out.println("Last Spoken Words: " + p.getLastspokenwords()); 
+ 
+            // 2. Modify fields 
+            p.setJerseynumber(100); 
+            p.setLastspokenwords("I will be retiring soon"); 
+ 
+            // 3. Send update back to server 
+            client.edit_XML(p, id);   // or edit_JSON(p, id); 
+ 
+            System.out.println("\nPlayer updated successfully!"); 
+        } finally { 
+            client.close(); 
+        } 
+    } 
+} 
