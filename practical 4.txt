@@ -1,0 +1,28 @@
+practical 4 :
+
+import requests
+
+def location(api_key,search_string):
+    base_url="https://us1.locationiq.com/v1/search"
+
+    params={
+        "key":api_key,
+        "q":search_string,
+        "format":"json"
+        }
+    response = requests.get(base_url,params=params)
+    data = response.json()
+    return data
+
+api_key="pk.a8d2a4cf04634d6a103410df83e98e5a"
+search_string=input("Enter te location : ")
+
+result=location(api_key,search_string)
+
+if result:
+    print("Place:", result[0]["display_name"])
+    print("Latitude:", result[0]["lat"])
+    print("Longitude:", result[0]["lon"])
+    print("Place ID:", result[0]["place_id"])
+    
+
